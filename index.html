@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="manifest" href="manifest.json">
+  <title>BoxLog Smart Moving & Inventory</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e2e8f0;
+      --fragile: #ef4444;
+      --heavy: #f59e0b;
+      --open1: #10b981;
+      --danger: #dc2626;
+    }
+    body.dark-theme {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 40px; transition: background 0.2s, color 0.2s; }
+    .container { max-width: 600px; margin: 0 auto; padding: 12px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; margin-bottom: 12px; }
+    .logo { font-weight: 800; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 6px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .btn-small { padding: 6px 12px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; background: var(--accent); color: #fff; transition: transform 0.1s, opacity 0.2s; }
+    .btn-small:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .project-bar { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    .row { display: flex; gap: 8px; }
+    .col { flex: 1; }
+    button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: var(--accent-hover); }
+    .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .action-grid button { padding: 8px; font-size: 12px; }
+    .flag-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #fff; margin-right: 4px; }
+    .flag-fragile { background: var(--fragile); }
+    .flag-heavy { background: var(--heavy); }
+    .flag-open1 { background: var(--open1); }
+    .inv-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); }
+    .inv-item:last-child { border-bottom: none; }
+    .inv-left { display: flex; align-items: center; gap: 10px; }
+    .inv-img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; background: var(--border); }
+    .inv-title { font-weight: 600; font-size: 14px; }
+    .inv-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .search-bar { position: relative; }
+    .search-bar input { padding-left: 32px; }
+    .search-icon { position: absolute; left: 10px; top: 10px; color: var(--muted); font-size: 14px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+    .modal-box { background: var(--card-bg); border-radius: 12px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); width: auto; padding: 0; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+    .db-table th, .db-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+    .db-table th { background: var(--bg); font-weight: 600; }
+    .db-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .db-tab-btn { padding: 6px 10px; font-size: 11px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; cursor: pointer; width: auto; }
+    .db-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .chk-row { display: flex; gap: 12px; margin-top: 8px; align-items: center; }
+    .chk-row label { font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .chk-row input { width: auto; }
+    .ai-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; background: #e0e7ff; color: #3730a3; }
+    .stats-bar { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 8px; }
+    .progress-outer { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+    .progress-inner { height: 100%; background: var(--open1); width: 0%; transition: width 0.3s; }
+    .grid-spacer { margin-top: 8px; }
+    .status-pill { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .status-packed { background: #dbeafe; color: #1e40af; }
+    .status-unpacked { background: #d1fae5; color: #065f46; }
+    .help-section { margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .help-title { font-weight: 700; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
+    .help-text { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+<div id="splash-screen" style="position:fixed; top:0; left:0; right:0; bottom:0; background:var(--bg); z-index:2000; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; text-align:center;">
+  <div style="font-size:48px; margin-bottom:12px;">📦</div>
+  <h1 style="color:var(--accent); font-size:28px; margin-bottom:8px;">BoxLog Smart Moving</h1>
+  <p style="color:var(--muted); font-size:14px; max-width:320px; margin-bottom:24px;">Organize belongings, track packed boxes, and sync inventory across devices.</p>
+  <button onclick="showDisclaimer()" style="max-width:240px;" title="Begin using BoxLog and review terms">Get Started</button>
+</div>
+
+<div id="legal-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>📜 Terms & Legal Disclaimer</h3>
+    <div style="font-size:12px; color:var(--muted); margin:12px 0; max-height:200px; overflow-y:auto; border:1px solid var(--border); padding:10px; border-radius:6px;">
+      <p><strong>Local Storage Privacy:</strong> BoxLog stores your inventory data locally in your browser's IndexedDB. It does not transmit data externally unless syncing to your designated local/cloud server.</p><br>
+      <p><strong>Liability:</strong> Developers are not liable for lost items, mislabeled boxes, or insurance valuation discrepancies resulting from app usage.</p>
+    </div>
+    <button onclick="acceptLegal()" title="Accept legal terms and enter BoxLog">Accept & Continue</button>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <div class="logo">📦 BoxLog</div>
+    <div class="header-right">
+      <button class="btn-small btn-outline" onclick="openModal('help-modal')" title="Open user guide, tips, and instructions">❓ Help</button>
+      <button class="btn-small btn-outline" onclick="startScanner()" title="Scan container QR code using camera">📱 SCAN QR</button>
+      <button class="btn-small btn-outline" onclick="toggleTheme()" title="Toggle dark/light theme mode">🌙</button>
+      <div class="ai-pill" id="sync-status" style="background:#d1fae5; color:#065f46;" title="Current connection & background sync status">🟢 Online</div>
+      <div class="ai-pill" id="ai-status">🧠 AI: Off</div>
+    </div>
+  </header>
+
+  <div class="project-bar" onclick="openModal('proj-modal')" title="Switch or manage workspace projects">
+    <div>
+      <span style="font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;">ACTIVE PROJECT</span>
+      <div id="cur-proj-name" style="font-weight:700; font-size:15px; color:var(--accent);">📁 Default Workspace</div>
+    </div>
+    <span style="color:var(--muted);">⚙️ Switch</span>
+  </div>
+
+  <div class="card">
+    <div class="form-group">
+      <label>CONTAINER SELECTOR</label>
+      <div class="row">
+        <select id="sel-container" class="col" title="Select box or container for items" onchange="updateUnpackButton(); updateStats();">
+          <option value="">-- Select Container --</option>
+        </select>
+        <button class="btn-small" style="width:auto; white-space:nowrap;" onclick="openModal('container-modal')" title="Create new box or bin">+ New Container</button>
+      </div>
+    </div>
+    <div class="progress-outer"><div class="progress-inner" id="unpack-bar"></div></div>
+    <div class="stats-bar">
+      <span id="stat-unpack">0% Unpacked</span>
+      <span id="stat-weight">0.0 lbs packed</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <label style="margin-bottom:0;">ITEM ENTRY</label>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-small btn-outline" id="btn-quick" onclick="toggleQuickAdd()" title="Toggle batch entry mode">⚡ Bulk Entry</button>
+        <button class="btn-small btn-outline" id="btn-voice" onclick="toggleVoiceDictation()" title="Dictate item details hands-free">🎤 Voice</button>
+        <button class="btn-small btn-outline" id="btn-unpacked" onclick="toggleUnpacked()" title="Mark container unpacked">✅ Unpacked</button>
+      </div>
+    </div>
+
+    <div id="quick-area" style="display:none; margin-bottom:12px;">
+      <textarea id="txt-quick" rows="3" placeholder="Batch entry (one per line):&#10;3 x Ceramic Plates $45&#10;2 x Fleece Blankets" title="Type multiple items line-by-line"></textarea>
+    </div>
+
+    <div class="form-group">
+      <div class="row">
+        <input type="text" id="inp-item" class="col" placeholder="Item description..." title="Enter item name or keywords">
+        <input type="number" id="inp-qty" style="width:70px;" value="1" min="1" placeholder="Qty" title="Quantity">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="row">
+        <select id="sel-cat" class="col" title="Item classification category">
+          <option value="General">Cat: General</option>
+          <option value="Kitchenware">Kitchenware</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Books & Media">Books & Media</option>
+          <option value="Documents">Documents</option>
+          <option value="Tools">Tools</option>
+          <option value="Valuables">Valuables</option>
+        </select>
+        <input type="number" id="inp-weight" class="col" step="0.1" placeholder="Wt (lbs)" title="Item weight in pounds">
+        <input type="number" id="inp-val" class="col" step="0.01" placeholder="Value ($)" title="Estimated item dollar value">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <button class="btn-small btn-outline" onclick="capturePhoto()" title="Take photo with device camera">📷 AI Cam</button>
+      <button class="btn-small btn-outline" onclick="document.getElementById('file-upload').click()" title="Upload image from gallery">📁 Upload</button>
+      <input type="file" id="file-upload" accept="image/*" style="display:none;" onchange="handleUpload(event)">
+    </div>
+
+    <div id="photo-preview" style="display:none; margin-bottom:12px; position:relative; width:80px; height:80px;">
+      <img id="preview-img" style="width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid var(--border);">
+      <button onclick="clearPhoto()" style="position:absolute; top:-6px; right:-6px; background:var(--danger); color:#fff; border-radius:50%; width:20px; height:20px; padding:0; font-size:10px; border:none; cursor:pointer;" title="Remove photo">✕</button>
+    </div>
+
+    <button onclick="addItem()" title="Save item into selected container">Add Item</button>
+
+    <div class="grid-spacer"></div>
+
+    <div class="action-grid">
+      <button class="btn-outline" onclick="printLabels()" title="Print container QR labels">🏷️ Print Labels</button>
+      <button class="btn-outline" onclick="exportCSV()" title="Export items to CSV spreadsheet">📄 Export CSV</button>
+      <button class="btn-outline" onclick="viewDB()" title="Open database table viewer">🗄️ View DB</button>
+      <button class="btn-outline" onclick="triggerDeltaSync()" title="Perform delta sync">☁️ Delta Sync</button>
+      <button class="btn-outline" onclick="manualBackup()" title="Download BoxLog_Sync.json backup">💾 Save File</button>
+      <button class="btn-outline" onclick="document.getElementById('restore-file').click()" title="Restore from backup JSON">📂 Load File</button>
+    </div>
+    <input type="file" id="restore-file" accept=".json" style="display:none;" onchange="manualRestore(event)">
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="inp-search" placeholder="Search items or boxes..." oninput="renderList()" title="Filter items by description or box code">
+    </div>
+    <div id="inv-list" style="margin-top:16px;"></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="proj-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Projects</h3>
+      <button class="modal-close" onclick="closeModal('proj-modal')" title="Close window">×</button>
+    </div>
+    <div id="proj-list"></div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <input type="text" id="inp-proj" placeholder="New project name" title="Project name">
+      <button class="btn-small" onclick="addProject()" title="Create new project">Add</button>
+    </div>
+  </div>
+</div>
+
+<div id="container-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>New Container</h3>
+      <button class="modal-close" onclick="closeModal('container-modal')" title="Close window">×</button>
+    </div>
+    <select id="sel-cont-type" title="Container type" style="margin-bottom:8px;">
+      <option value="BOX">Box</option>
+      <option value="LUG">Luggage</option>
+      <option value="BAG">Backpack</option>
+      <option value="BIN">Bin</option>
+      <option value="DRW">Drawer</option>
+      <option value="OTHER">Other</option>
+    </select>
+    <input type="text" id="inp-cont-name" placeholder="Custom Name (e.g., Kitchen, Samsonite)" title="Nickname" style="margin-bottom:8px;">
+    <select id="sel-room" title="Destination room" style="margin-bottom:8px;">
+      <option value="Unassigned">Room: Unassigned</option>
+      <option value="Kitchen">Kitchen</option>
+      <option value="Master Bed">Master Bed</option>
+      <option value="Living Room">Living Room</option>
+      <option value="Garage">Garage</option>
+      <option value="Office">Office</option>
+      <option value="Bathroom">Bathroom</option>
+    </select>
+    <div class="chk-row">
+      <label title="Fragile handle with care"><input type="checkbox" id="chk-fragile"> ⚠️ Fragile</label>
+      <label title="Heavy over 30 lbs"><input type="checkbox" id="chk-heavy"> 🏋️ Heavy</label>
+      <label title="Priority open first"><input type="checkbox" id="chk-open1"> 🚨 Open First</label>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:14px;">
+      <button onclick="addContainer()" title="Save container" style="flex:1;">Create Container</button>
+      <button class="btn-outline" onclick="nfcWriteContainer()" title="Write ID to physical NFC tag" style="width:auto;">🏷️ NFC Tag</button>
+    </div>
+  </div>
+</div>
+
+<div id="view-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:680px;">
+    <div class="modal-header">
+      <h3>Database Viewer & Search</h3>
+      <button class="modal-close" onclick="closeModal('view-modal')" title="Close database view">×</button>
+    </div>
+    <div class="db-tabs">
+      <button class="db-tab-btn active" id="tab-btn-conts" onclick="switchDbTab('conts')" title="View containers">📦 Containers</button>
+      <button class="db-tab-btn" id="tab-btn-items" onclick="switchDbTab('items')" title="View items">📋 Items</button>
+      <button class="db-tab-btn" id="tab-btn-projs" onclick="switchDbTab('projs')" title="View projects">📁 Projects</button>
+      <button class="db-tab-btn" id="tab-btn-insur" onclick="switchDbTab('insur')" title="Insurance claim manifest">📋 Insurance</button>
+      <button class="db-tab-btn" id="tab-btn-truck" onclick="switchDbTab('truck')" title="Truck loading sequence">🚛 Truck Order</button>
+      <button class="db-tab-btn" id="tab-btn-json" onclick="switchDbTab('json')" title="Raw JSON data">{ } Raw JSON</button>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+      <input type="text" id="db-search-input" placeholder="🔍 Search database..." oninput="renderDbTab(currentDbTab)" style="flex:1; min-width:140px; font-size:12px; padding:6px 10px;" title="Search keyword">
+      <select id="db-filter-cat" onchange="renderDbTab(currentDbTab)" style="width:auto; font-size:12px; padding:6px 10px;" title="Filter by category">
+        <option value="">All Categories</option>
+        <option value="Kitchenware">Kitchenware</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Clothing">Clothing</option>
+        <option value="Books & Media">Books & Media</option>
+        <option value="Documents">Documents</option>
+        <option value="Tools">Tools</option>
+        <option value="Valuables">Valuables</option>
+      </select>
+      <select id="db-filter-status" onchange="renderDbTab(currentDbTab)" style="width:auto; font-size:12px; padding:6px 10px;" title="Filter by status">
+        <option value="">All Statuses</option>
+        <option value="packed">Packed</option>
+        <option value="unpacked">Unpacked</option>
+      </select>
+      <select id="db-filter-flag" onchange="renderDbTab(currentDbTab)" style="width:auto; font-size:12px; padding:6px 10px;" title="Filter by hazard flags">
+        <option value="">All Flags</option>
+        <option value="fragile">⚠️ Fragile</option>
+        <option value="heavy">🏋️ Heavy</option>
+        <option value="open1">🚨 Open First</option>
+      </select>
+    </div>
+    <div id="db-tab-content" style="max-height:50vh; overflow-y:auto;"></div>
+  </div>
+</div>
+
+<div id="scan-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Scan QR Code</h3>
+      <button class="modal-close" onclick="stopScanner()" title="Close scanner">×</button>
+    </div>
+    <div id="qr-reader" style="width:100%;"></div>
+  </div>
+</div>
+
+<div id="cam-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>AI Camera & OCR</h3>
+      <button class="modal-close" onclick="closeCamera()" title="Close camera">×</button>
+    </div>
+    <video id="cam-vid" autoplay playsinline style="width:100%; border-radius:8px; background:#000; max-height:240px;"></video>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button onclick="analyzeFrame()" style="flex:1;" title="Capture frame and run AI image recognition">📸 Snap & Identify</button>
+      <button class="btn-outline" onclick="scanSerialOCR()" style="flex:1;" title="Run Tesseract.js OCR to read serial numbers or barcodes">🔍 Scan Serial OCR</button>
+    </div>
+    <div id="ai-result" style="margin-top:12px; font-size:12px; color:var(--muted); text-align:center;"></div>
+  </div>
+</div>
+
+<div id="help-modal" class="modal-overlay">
+  <div class="modal-box" style="max-height:85vh;">
+    <div class="modal-header">
+      <h3>❓ BoxLog Smart Guide</h3>
+      <button class="modal-close" onclick="closeModal('help-modal')" title="Close help window">×</button>
+    </div>
+    
+    <div class="help-section">
+      <div class="help-title">🌐 Netlify & Cloud Deployment</div>
+      <div class="help-text">BoxLog runs natively as a PWA on Netlify with full HTTPS encryption. All data is saved safely in browser IndexedDB. Cross-device syncing is performed using <strong>💾 Save File</strong> and <strong>📂 Load File</strong> via iCloud Drive or Google Drive.</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-title">📱 Apple iOS & iPad Installation</div>
+      <div class="help-text">Open BoxLog in native Safari on your iPhone or iPad, tap the <strong>Share</strong> icon, and select <strong>"Add to Home Screen"</strong> to install BoxLog as a standalone native app icon.</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-title">📷 iPad Camera & Voice Permissions</div>
+      <div class="help-text">If camera or voice buttons are blocked in Safari: tap the <strong>aA</strong> settings icon on the left of Safari's address bar, choose <strong>Website Settings</strong>, and set <strong>Camera</strong> and <strong>Microphone</strong> to <strong>Allow</strong>.</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-title">🗄️ Database Tables & Real-Time Search</div>
+      <div class="help-text">Tap <strong>🗄️ View DB</strong> to search containers, items, projects, room assignments, insurance valuation manifests, and 3-tier moving truck loading sequences.</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-title">🎤 Voice Dictation & Serial Number OCR</div>
+      <div class="help-text">Tap <strong>🎤 Voice</strong> to dictate items hands-free (e.g. <em>"3 porcelain plates 45 dollars"</em>). Use <strong>📷 AI Cam</strong> \(\rightarrow\) <strong>🔍 Scan Serial OCR</strong> to extract model numbers and barcodes directly into descriptions.</div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-title">💻 Local Python Sync Server</div>
+      <div class="help-text">When running locally on a PC, execute <code>python sync_server.py</code> to enable multi-device automatic Wi-Fi delta sync across your home network.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let db;
+let currentProject = 'proj_default';
+let currentItemPhoto = null;
+let currentDbData = null;
+let currentDbTab = 'conts';
+let isVoiceActive = false;
+let model = null;
+let html5QrCode = null;
+
+const initDB = () => {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('BoxLogDB_v1', 2);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('projects')) d.createObjectStore('projects', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('containers')) d.createObjectStore('containers', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('items')) {
+        const itemStore = d.createObjectStore('items', { keyPath: 'id' });
+        itemStore.createIndex('containerId', 'containerId', { unique: false });
+      }
+      if (!d.objectStoreNames.contains('images')) {
+        const imgStore = d.createObjectStore('images', { keyPath: 'id' });
+        imgStore.createIndex('itemId', 'itemId', { unique: false });
+      }
+    };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    req.onerror = (e) => reject(e);
+  });
+};
+
+const dbOp = (storeName, mode, callback) => {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, mode);
+    const store = tx.objectStore(storeName);
+    const req = callback(store);
+    tx.oncomplete = () => resolve(req ? req.result : null);
+    tx.onerror = (e) => reject(e);
+  });
+};
+
+const initApp = async () => {
+  await initDB();
+  const projs = await dbOp('projects', 'readonly', s => s.getAll());
+  if (projs.length === 0) {
+    await dbOp('projects', 'readwrite', s => s.add({ id: 'proj_default', name: 'Default Workspace' }));
+  }
+  await refreshProjects();
+  await refreshContainers();
+  await renderList();
+  await updateStats();
+  initAI();
+  setupAutoBackup();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg error:', err));
+};
+
+window.onload = () => {
+  if (localStorage.getItem('boxlog_legal_accepted') === 'true') {
+    document.getElementById('splash-screen').style.display = 'none';
+    initApp();
+  }
+};
+
+const showDisclaimer = () => {
+  document.getElementById('legal-modal').style.display = 'flex';
+};
+
+const acceptLegal = () => {
+  localStorage.setItem('boxlog_legal_accepted', 'true');
+  document.getElementById('legal-modal').style.display = 'none';
+  document.getElementById('splash-screen').style.display = 'none';
+  initApp();
+};
+
+const toggleTheme = () => {
+  document.body.classList.toggle('dark-theme');
+};
+
+const refreshProjects = async () => {
+  const projs = await dbOp('projects', 'readonly', s => s.getAll());
+  const listEl = document.getElementById('proj-list');
+  listEl.innerHTML = '';
+  projs.forEach(p => {
+    const isCur = p.id === currentProject;
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex; justify-space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);';
+    div.innerHTML = `<span style="cursor:pointer; font-weight:${isCur?'700':'400'}; color:${isCur?'var(--accent)':'var(--text)'};" onclick="switchProj('${p.id}')">${p.name} ${isCur?'(Active)':''}</span>${p.id !== 'proj_default' ? `<button class="btn-small btn-danger" style="width:auto; padding:2px 8px;" onclick="delProj('${p.id}')">Del</button>` : ''}`;
+    listEl.appendChild(div);
+  });
+  const curP = projs.find(p => p.id === currentProject);
+  if (curP) document.getElementById('cur-proj-name').innerText = curP.name;
+};
+
+const addProject = async () => {
+  const inp = document.getElementById('inp-proj');
+  if (!inp.value.trim()) return;
+  const newId = 'proj_' + Date.now();
+  await dbOp('projects', 'readwrite', s => s.add({ id: newId, name: inp.value.trim() }));
+  inp.value = '';
+  await refreshProjects();
+  await switchProj(newId);
+  closeModal('proj-modal');
+};
+
+const delProj = async (id) => {
+  if (!confirm('Delete this project and all its containers/items?')) return;
+  await dbOp('projects', 'readwrite', s => s.delete(id));
+  const containers = await dbOp('containers', 'readonly', s => s.getAll());
+  for (let c of containers) {
+    if (c.projId === id) {
+      await dbOp('containers', 'readwrite', s => s.delete(c.id));
+      const items = await dbOp('items', 'readonly', s => s.index('containerId').getAll(c.id));
+      for (let i of items) await dbOp('items', 'readwrite', s => s.delete(i.id));
+    }
+  }
+  if (currentProject === id) await switchProj('proj_default');
+  else await refreshProjects();
+};
+
+const switchProj = async (id) => {
+  currentProject = id;
+  await refreshProjects();
+  await refreshContainers();
+  await renderList();
+  await updateStats();
+  closeModal('proj-modal');
+};
+
+const refreshContainers = async () => {
+  const containers = await dbOp('containers', 'readonly', s => s.getAll());
+  const sel = document.getElementById('sel-container');
+  const val = sel.value;
+  sel.innerHTML = '<option value="">-- Select Container --</option>';
+  containers.filter(c => c.projId === currentProject).sort((a,b) => b.ts - a.ts).forEach(c => {
+    let flags = '';
+    if (c.isFragile) flags += '⚠️ ';
+    if (c.isHeavy) flags += '🏋️ ';
+    if (c.isOpenFirst) flags += '🚨 ';
+    sel.innerHTML += `<option value="${c.id}">${flags}${c.code} - ${c.name} [${c.room || 'Unassigned'}]</option>`;
+  });
+  sel.value = val;
+  updateUnpackButton();
+  updateStats();
+};
+
+const addContainer = async () => {
+  const type = document.getElementById('sel-cont-type').value;
+  const name = document.getElementById('inp-cont-name').value.trim() || type;
+  const room = document.getElementById('sel-room').value;
+  const isFragile = document.getElementById('chk-fragile').checked;
+  const isHeavy = document.getElementById('chk-heavy').checked;
+  const isOpenFirst = document.getElementById('chk-open1').checked;
+  const count = (await dbOp('containers', 'readonly', s => s.getAll())).filter(c => c.projId === currentProject).length + 1;
+  const code = type + '-' + String(count).padStart(3, '0');
+  const newCont = { id: 'cont_' + Date.now(), projId: currentProject, code, name, type, room, isFragile, isHeavy, isOpenFirst, isUnpacked: false, ts: Date.now() };
+  await dbOp('containers', 'readwrite', s => s.add(newCont));
+  document.getElementById('inp-cont-name').value = '';
+  document.getElementById('chk-fragile').checked = false;
+  document.getElementById('chk-heavy').checked = false;
+  document.getElementById('chk-open1').checked = false;
+  await refreshContainers();
+  document.getElementById('sel-container').value = newCont.id;
+  updateUnpackButton();
+  updateStats();
+  closeModal('container-modal');
+};
+
+const updateUnpackButton = async () => {
+  const contId = document.getElementById('sel-container').value;
+  const btn = document.getElementById('btn-unpacked');
+  if (!btn) return;
+  if (!contId) {
+    btn.style.background = 'transparent'; btn.style.color = 'var(--accent)'; btn.style.borderColor = 'var(--accent)';
+    return;
+  }
+  const c = await dbOp('containers', 'readonly', s => s.get(contId));
+  if (c && c.isUnpacked) {
+    btn.innerText = '✅ Unpacked'; btn.style.background = 'var(--open1)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--open1)';
+  } else {
+    btn.innerText = '✅ Unpacked'; btn.style.background = 'transparent'; btn.style.color = 'var(--accent)'; btn.style.borderColor = 'var(--accent)';
+  }
+};
+
+const toggleUnpacked = async () => {
+  const contId = document.getElementById('sel-container').value;
+  if (!contId) return alert('Please select a container first!');
+  const c = await dbOp('containers', 'readonly', s => s.get(contId));
+  if (c) {
+    c.isUnpacked = !c.isUnpacked;
+    await dbOp('containers', 'readwrite', s => s.put(c));
+    await updateUnpackButton();
+    await updateStats();
+  }
+};
+
+const addItem = async () => {
+  const contId = document.getElementById('sel-container').value;
+  if (!contId) return alert('Please select a container first!');
+  const val = parseFloat(document.getElementById('inp-val').value || 0);
+  const isQuick = document.getElementById('quick-area').style.display === 'block';
+  const photo = currentItemPhoto;
+  if (isQuick) {
+    const lines = document.getElementById('txt-quick').value.split('\n').filter(l => l.trim());
+    for (let line of lines) {
+      const match = line.match(/^(\d+)\s*x\s*/i);
+      const valMatch = line.match(/\$\s*(\d+(?:\.\d+)?)/);
+      const qty = match ? parseInt(match[1]) : 1;
+      const itemVal = valMatch ? parseFloat(valMatch[1]) : val;
+      let name = line;
+      if (match) name = name.replace(match[0], '');
+      if (valMatch) name = name.replace(valMatch[0], '');
+      name = name.trim();
+      if (name) await dbOp('items', 'readwrite', s => s.add({ id: 'item_' + Date.now() + Math.random(), containerId: contId, name, qty, cat: inferCat(name), val: itemVal, weight: 0, image: null, ts: Date.now() }));
+    }
+    document.getElementById('txt-quick').value = '';
+  } else {
+    const name = document.getElementById('inp-item').value.trim();
+    const qty = parseInt(document.getElementById('inp-qty').value || 1);
+    const cat = document.getElementById('sel-cat').value;
+    const weight = parseFloat(document.getElementById('inp-weight').value || 0);
+    if (!name) return alert('Please enter an item description.');
+    const itemId = 'item_' + Date.now();
+    let imgId = null;
+    if (photo) {
+      imgId = 'img_' + Date.now() + '_' + Math.random().toString(36).substring(2,6);
+      await dbOp('images', 'readwrite', s => s.add({ id: imgId, itemId: itemId, data: photo, ts: Date.now() }));
+    }
+    await dbOp('items', 'readwrite', s => s.add({ id: itemId, containerId: contId, name, qty, cat, weight, val, imageId: imgId, image: null, ts: Date.now() }));
+    document.getElementById('inp-item').value = '';
+    document.getElementById('inp-qty').value = '1';
+    document.getElementById('inp-weight').value = '';
+    document.getElementById('inp-val').value = '';
+    clearPhoto();
+  }
+  await renderList();
+  await updateStats();
+};
+
+const editItem = async (id) => {
+  const item = await dbOp('items', 'readonly', s => s.get(id));
+  if (!item) return;
+  const newName = prompt('Edit item description:', item.name);
+  if (newName === null) return;
+  const newQtyStr = prompt('Edit quantity:', item.qty || 1);
+  if (newQtyStr === null) return;
+  const newValStr = prompt('Edit estimated value ($):', item.val || 0);
+  if (newValStr === null) return;
+  const newWtStr = prompt('Edit weight (lbs):', item.weight || 0);
+  if (newWtStr === null) return;
+
+  item.name = newName.trim() || item.name;
+  item.qty = parseInt(newQtyStr) || 1;
+  item.val = parseFloat(newValStr) || 0;
+  item.weight = parseFloat(newWtStr) || 0;
+  item.ts = Date.now();
+
+  await dbOp('items', 'readwrite', s => s.put(item));
+  await renderList();
+  await updateStats();
+};
+
+const delItem = async (id) => {
+  const item = await dbOp('items', 'readonly', s => s.get(id));
+  if (item && item.imageId) {
+    try { await dbOp('images', 'readwrite', s => s.delete(item.imageId)); } catch(e){}
+  }
+  await dbOp('items', 'readwrite', s => s.delete(id));
+  await renderList();
+  await updateStats();
+};
+
+const renderList = async () => {
+  const searchEl = document.getElementById('inp-search');
+  const search = searchEl ? searchEl.value.toLowerCase().trim() : '';
+  const items = await dbOp('items', 'readonly', s => s.getAll());
+  const containers = await dbOp('containers', 'readonly', s => s.getAll());
+  let allImages = [];
+  try { allImages = await dbOp('images', 'readonly', s => s.getAll()); } catch(e){}
+  const imgMap = {};
+  (allImages || []).forEach(img => imgMap[img.id] = img.data);
+
+  const contMap = {};
+  containers.forEach(c => contMap[c.id] = c);
+  const filtered = items.filter(i => contMap[i.containerId] && contMap[i.containerId].projId === currentProject);
+  const searched = search ? filtered.filter(i => i.name.toLowerCase().includes(search) || contMap[i.containerId].code.toLowerCase().includes(search) || (contMap[i.containerId].room||'').toLowerCase().includes(search)) : filtered;
+  const div = document.getElementById('inv-list');
+  if (!div) return;
+  if (searched.length === 0) {
+    div.innerHTML = '<p style="text-align:center; color:var(--muted); padding:20px;">No items found.</p>';
+    return;
+  }
+  div.innerHTML = searched.sort((a,b) => b.ts - a.ts).map(i => {
+    const c = contMap[i.containerId];
+    const wStr = i.weight > 0 ? ` • ${i.weight}lbs` : '';
+    const vStr = i.val > 0 ? ` • $${i.val.toFixed(2)}` : '';
+    const photoSrc = (i.imageId && imgMap[i.imageId]) ? imgMap[i.imageId] : (i.image || null);
+    const imgTag = photoSrc ? `<img src="${photoSrc}" class="inv-img">` : '<div class="inv-img" style="display:flex; justify-content:center; align-items:center; color:var(--muted); font-size:18px;">📦</div>';
+    return `<div class="inv-item">
+      <div class="inv-left">
+        ${imgTag}
+        <div>
+          <div class="inv-title">${i.name} <span class="inv-meta">x${i.qty}</span></div>
+          <div class="inv-sub">${c.code} (${c.name}) • <span class="cat-pill">${i.cat}</span>${wStr}${vStr}</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button class="btn-small btn-outline" onclick="editItem('${i.id}')" title="Edit item details">✏️ Edit</button>
+        <button class="btn-small btn-danger" onclick="delItem('${i.id}')" title="Delete item">Del</button>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+const toggleQuickAdd = () => {
+  const area = document.getElementById('quick-area');
+  const btn = document.getElementById('btn-quick');
+  if (area.style.display === 'none' || area.style.display === '') {
+    area.style.display = 'block'; btn.style.background = 'var(--accent)'; btn.style.color = '#fff';
+  } else {
+    area.style.display = 'none'; btn.style.background = 'transparent'; btn.style.color = 'var(--accent)';
+  }
+};
+
+const toggleVoiceDictation = () => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return alert('Web Speech API is not supported in this browser environment.');
+  const btn = document.getElementById('btn-voice');
+  if (isVoiceActive) {
+    isVoiceActive = false;
+    btn.style.background = 'transparent'; btn.style.color = 'var(--accent)';
+    return;
+  }
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false; recognition.interimResults = false; recognition.lang = 'en-US';
+  recognition.onstart = () => {
+    isVoiceActive = true;
+    btn.style.background = 'var(--danger)'; btn.style.color = '#fff'; btn.innerText = '🔴 Listening...';
+  };
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('inp-item').value = transcript;
+    document.getElementById('sel-cat').value = inferCat(transcript);
+    const numMatch = transcript.match(/(\d+)/);
+    if (numMatch) document.getElementById('inp-qty').value = numMatch[1];
+    const valMatch = transcript.match(/(\d+)\s*(?:dollars|\$)/i);
+    if (valMatch) document.getElementById('inp-val').value = valMatch[1];
+  };
+  recognition.onerror = (e) => {
+    alert('Voice recognition notice: ' + e.error);
+    isVoiceActive = false; btn.style.background = 'transparent'; btn.style.color = 'var(--accent)'; btn.innerText = '🎤 Voice';
+  };
+  recognition.onend = () => {
+    isVoiceActive = false; btn.style.background = 'transparent'; btn.style.color = 'var(--accent)'; btn.innerText = '🎤 Voice';
+  };
+  recognition.start();
+};
+
+const inferCat = (text) => {
+  const t = text.toLowerCase();
+  if (t.match(/plate|bowl|cup|pan|pot|fork|spoon|dish|kitchen|glass/)) return 'Kitchenware';
+  if (t.match(/tv|cable|laptop|phone|charger|headphone|speaker|camera|screen/)) return 'Electronics';
+  if (t.match(/shirt|pants|jacket|shoe|sock|coat|hat|dress|fleece|blanket/)) return 'Clothing';
+  if (t.match(/book|novel|dvd|cd|game|journal|album/)) return 'Books & Media';
+  if (t.match(/passport|tax|deed|file|paper|receipt|cert|contract/)) return 'Documents';
+  if (t.match(/drill|hammer|wrench|screw|prowler|saw|tape|tool/)) return 'Tools';
+  if (t.match(/jewelry|watch|gold|silver|art|coin|cash|antique/)) return 'Valuables';
+  return 'General';
+};
+
+const viewDB = async () => {
+  let images = [];
+  try { images = await dbOp('images', 'readonly', s => s.getAll()); } catch(e){}
+  currentDbData = {
+    projects: await dbOp('projects', 'readonly', s => s.getAll()),
+    containers: await dbOp('containers', 'readonly', s => s.getAll()),
+    items: await dbOp('items', 'readonly', s => s.getAll()),
+    images: images
+  };
+  switchDbTab('conts');
+  openModal('view-modal');
+};
+
+const switchDbTab = (tab) => {
+  currentDbTab = tab;
+  document.querySelectorAll('.db-tab-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('tab-btn-' + tab);
+  if (btn) btn.classList.add('active');
+  renderDbTab(tab);
+};
+
+const renderDbTab = (tab) => {
+  const container = document.getElementById('db-tab-content');
+  if (!currentDbData) return;
+  const qEl = document.getElementById('db-search-input');
+  const q = qEl ? qEl.value.toLowerCase().trim() : '';
+  const catEl = document.getElementById('db-filter-cat');
+  const cat = catEl ? catEl.value : '';
+  const stEl = document.getElementById('db-filter-status');
+  const status = stEl ? stEl.value : '';
+  const flEl = document.getElementById('db-filter-flag');
+  const flag = flEl ? flEl.value : '';
+
+  if (tab === 'conts') {
+    let list = currentDbData.containers.filter(c => c.projId === currentProject);
+    if (q) list = list.filter(c => c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || (c.room||'').toLowerCase().includes(q));
+    if (status === 'packed') list = list.filter(c => !c.isUnpacked);
+    if (status === 'unpacked') list = list.filter(c => c.isUnpacked);
+    if (flag === 'fragile') list = list.filter(c => c.isFragile);
+    if (flag === 'heavy') list = list.filter(c => c.isHeavy);
+    if (flag === 'open1') list = list.filter(c => c.isOpenFirst);
+
+    if (list.length === 0) { container.innerHTML = '<p style="padding:20px; text-align:center; color:var(--muted);">No matching containers found.</p>'; return; }
+    let html = '<table class="db-table"><thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Room</th><th>Flags</th><th>Status</th></tr></thead><tbody>';
+    list.forEach(c => {
+      let fStr = '';
+      if (c.isFragile) fStr += '⚠️ ';
+      if (c.isHeavy) fStr += '🏋️ ';
+      if (c.isOpenFirst) fStr += '🚨 ';
+      const sBadge = c.isUnpacked ? '<span class="status-pill status-unpacked">Unpacked</span>' : '<span class="status-pill status-packed">Packed</span>';
+      html += `<tr><td><strong>${c.code}</strong></td><td>${c.name}</td><td>${c.type}</td><td>${c.room||'Unassigned'}</td><td>${fStr||'-'}</td><td>${sBadge}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } else if (tab === 'items') {
+    const contMap = {};
+    currentDbData.containers.forEach(c => contMap[c.id] = c);
+    let list = currentDbData.items.filter(i => contMap[i.containerId] && contMap[i.containerId].projId === currentProject);
+    if (q) list = list.filter(i => i.name.toLowerCase().includes(q) || contMap[i.containerId].code.toLowerCase().includes(q));
+    if (cat) list = list.filter(i => i.cat === cat);
+
+    if (list.length === 0) { container.innerHTML = '<p style="padding:20px; text-align:center; color:var(--muted);">No matching items found.</p>'; return; }
+    let html = '<table class="db-table"><thead><tr><th>Item Name</th><th>Qty</th><th>Box</th><th>Category</th><th>Weight</th><th>Value</th></tr></thead><tbody>';
+    list.forEach(i => {
+      const c = contMap[i.containerId];
+      html += `<tr><td><strong>${i.name}</strong></td><td>${i.qty}</td><td>${c.code}</td><td>${i.cat}</td><td>${i.weight?i.weight+' lbs':'-'}</td><td>${i.val?'$'+i.val.toFixed(2):'-'}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } else if (tab === 'projs') {
+    let html = '<table class="db-table"><thead><tr><th>Project Name</th><th>ID</th></tr></thead><tbody>';
+    currentDbData.projects.forEach(p => {
+      html += `<tr><td><strong>${p.name}</strong> ${p.id===currentProject?'(Active)':''}</td><td><code>${p.id}</code></td></tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } else if (tab === 'insur') {
+    const contMap = {};
+    currentDbData.containers.forEach(c => contMap[c.id] = c);
+    const list = currentDbData.items.filter(i => contMap[i.containerId] && contMap[i.containerId].projId === currentProject && (i.val >= 50));
+    let totalVal = 0;
+    list.forEach(i => totalVal += (i.val || 0) * (i.qty || 1));
+    let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><strong style="color:var(--accent);">Total High-Value ($50+): $${totalVal.toFixed(2)}</strong><button class="btn-small" style="width:auto;" onclick="exportInsuranceCSV()">📄 Export Claim CSV</button></div>`;
+    html += '<table class="db-table"><thead><tr><th>High-Value Item</th><th>Qty</th><th>Value</th><th>Box Code</th><th>Room</th></tr></thead><tbody>';
+    list.forEach(i => {
+      const c = contMap[i.containerId];
+      html += `<tr><td><strong>${i.name}</strong></td><td>${i.qty}</td><td>$${(i.val||0).toFixed(2)}</td><td>${c.code}</td><td>${c.room||'Unassigned'}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } else if (tab === 'truck') {
+    const conts = currentDbData.containers.filter(c => c.projId === currentProject);
+    const tier1 = conts.filter(c => c.isHeavy);
+    const tier3 = conts.filter(c => c.isFragile || c.isOpenFirst);
+    const tier2 = conts.filter(c => !c.isHeavy && !c.isFragile && !c.isOpenFirst);
+
+    let html = '<div style="font-size:12px; margin-bottom:8px; color:var(--muted);">Recommended 3-tier loading strategy for moving truck stability:</div>';
+    html += '<div style="margin-bottom:8px;"><strong style="color:var(--danger);">Tier 1 (Base/Floor): Heavy Containers</strong><br>' + (tier1.map(c=>c.code+' ('+c.name+')').join(', ')||'None') + '</div>';
+    html += '<div style="margin-bottom:8px;"><strong style="color:var(--accent);">Tier 2 (Middle Layer): Standard Inventory</strong><br>' + (tier2.map(c=>c.code+' ('+c.name+')').join(', ')||'None') + '</div>';
+    html += '<div style="margin-bottom:8px;"><strong style="color:var(--open1);">Tier 3 (Rear Door/Priority): Fragile & Open First</strong><br>' + (tier3.map(c=>c.code+' ('+c.name+')').join(', ')||'None') + '</div>';
+    container.innerHTML = html;
+
+  } else if (tab === 'json') {
+    container.innerHTML = `<pre style="font-size:11px; white-space:pre-wrap; background:var(--bg); padding:10px; border-radius:8px;">${JSON.stringify(currentDbData, null, 2)}</pre>`;
+  }
+};
+
+const exportInsuranceCSV = async () => {
+  const items = await dbOp('items', 'readonly', s => s.getAll());
+  const containers = await dbOp('containers', 'readonly', s => s.getAll());
+  const contMap = {};
+  containers.forEach(c => contMap[c.id] = c);
+  const list = items.filter(i => contMap[i.containerId] && contMap[i.containerId].projId === currentProject && (i.val >= 50));
+  let csv = 'Item Name,Qty,Category,Declared Value,Box Code,Box Name,Room\n';
+  list.forEach(i => {
+    const c = contMap[i.containerId];
+    csv += `"${i.name}",${i.qty},"${i.cat}",${i.val||0},"${c.code}","${c.name}","${c.room||'Unassigned'}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'BoxLog_Insurance_Manifest.csv'; a.click();
+};
+
+const exportCSV = async () => {
+  const items = await dbOp('items', 'readonly', s => s.getAll());
+  const containers = await dbOp('containers', 'readonly', s => s.getAll());
+  const contMap = {};
+  containers.forEach(c => contMap[c.id] = c);
+  let csv = 'Item Name,Qty,Category,Weight (lbs),Value ($),Box Code,Box Name,Room\n';
+  items.filter(i => contMap[i.containerId] && contMap[i.containerId].projId === currentProject).forEach(i => {
+    const c = contMap[i.containerId];
+    csv += `"${i.name}",${i.qty},"${i.cat}",${i.weight||0},${i.val||0},"${c.code}","${c.name}","${c.room||'Unassigned'}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'BoxLog_Inventory_Export.csv'; a.click();
+};
+
+const printLabels = async () => {
+  const containers = (await dbOp('containers', 'readonly', s => s.getAll())).filter(c => c.projId === currentProject);
+  if (containers.length === 0) return alert('No containers to print.');
+  const w = window.open('', '_blank');
+  let html = '<html><head><title>BoxLog QR Labels</title><style>body{font-family:sans-serif; display:grid; grid-template-columns:repeat(2,1fr); gap:20px; padding:20px;}.card{border:2px solid #000; padding:15px; border-radius:10px; text-align:center;}</style></head><body>';
+  containers.forEach(c => {
+    html += `<div class="card"><h2>${c.code}</h2><h3>${c.name}</h3><p>Room: ${c.room||'Unassigned'}</p><div id="qr_${c.id}" style="display:flex; justify-content:center; margin:10px 0;"></div></div>`;
+  });
+  html += `<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>`;
+  containers.forEach(c => {
+    html += `new QRCode(document.getElementById("qr_${c.id}"), { text: "${c.code}", width: 100, height: 100 });`;
+  });
+  html += `window.onload = () => window.print();<\/script></body></html>`;
+  w.document.write(html);
+};
+
+const manualBackup = async () => {
+  let images = [];
+  try { images = await dbOp('images', 'readonly', s => s.getAll()); } catch(e){}
+  const data = {
+    projects: await dbOp('projects', 'readonly', s => s.getAll()),
+    containers: await dbOp('containers', 'readonly', s => s.getAll()),
+    items: await dbOp('items', 'readonly', s => s.getAll()),
+    images: images
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'BoxLog_Sync.json'; a.click();
+};
+
+const manualRestore = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  const data = JSON.parse(text);
+  if (!confirm('Overwrite local data with loaded backup file?')) return;
+  await dbOp('projects', 'readwrite', s => { s.clear(); (data.projects||[]).forEach(p => s.put(p)); return s.getAll(); });
+  await dbOp('containers', 'readwrite', s => { s.clear(); (data.containers||[]).forEach(c => s.put(c)); return s.getAll(); });
+  await dbOp('items', 'readwrite', s => { s.clear(); (data.items||[]).forEach(i => s.put(i)); return s.getAll(); });
+  if (data.images) {
+    try { await dbOp('images', 'readwrite', s => { s.clear(); data.images.forEach(img => s.put(img)); return s.getAll(); }); } catch(e){}
+  }
+  await refreshProjects(); await refreshContainers(); await renderList(); await updateStats();
+  alert('✅ Data restored successfully!');
+};
+
+const triggerDeltaSync = async () => {
+  const data = {
+    projects: await dbOp('projects', 'readonly', s => s.getAll()),
+    containers: await dbOp('containers', 'readonly', s => s.getAll()),
+    items: await dbOp('items', 'readonly', s => s.getAll())
+  };
+  try {
+    const res = await fetch('/api/sync/delta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      const serverData = await res.json();
+      await dbOp('projects', 'readwrite', s => { s.clear(); serverData.projects.forEach(p => s.put(p)); return s.getAll(); });
+      await dbOp('containers', 'readwrite', s => { s.clear(); serverData.containers.forEach(c => s.put(c)); return s.getAll(); });
+      await dbOp('items', 'readwrite', s => { s.clear(); serverData.items.forEach(i => s.put(i)); return s.getAll(); });
+      await refreshProjects(); await refreshContainers(); await renderList(); await updateStats();
+      alert('☁️ Delta Sync complete!');
+    } else {
+      alert('Local sync server returned status ' + res.status);
+    }
+  } catch (e) {
+    alert('Local sync server unavailable. For standalone Netlify hosting, data is stored safely in browser IndexedDB.');
+  }
+};
+
+const updateNetworkStatus = () => {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  if (navigator.onLine) {
+    el.innerText = '🟢 Online'; el.style.background = '#d1fae5'; el.style.color = '#065f46';
+  } else {
+    el.innerText = '🔴 Offline'; el.style.background = '#fee2e2'; el.style.color = '#991b1b';
+  }
+};
+
+window.addEventListener('online', updateNetworkStatus);
+window.addEventListener('offline', updateNetworkStatus);
+
+const openModal = (id) => { document.getElementById(id).style.display = 'flex'; };
+const closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
+
+const capturePhoto = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    document.getElementById('cam-vid').srcObject = stream;
+    openModal('cam-modal');
+  } catch (e) {
+    alert('Camera permission denied or camera unavailable.');
+  }
+};
+
+const closeCamera = () => {
+  const vid = document.getElementById('cam-vid');
+  if (vid.srcObject) {
+    vid.srcObject.getTracks().forEach(t => t.stop());
+  }
+  closeModal('cam-modal');
+};
+
+const handleUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    currentItemPhoto = evt.target.result;
+    document.getElementById('preview-img').src = currentItemPhoto;
+    document.getElementById('photo-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+};
+
+const clearPhoto = () => {
+  currentItemPhoto = null;
+  document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('file-upload').value = '';
+};
+
+const initAI = async () => {
+  try {
+    model = await mobilenet.load();
+    document.getElementById('ai-status').innerText = '🧠 AI: Ready';
+  } catch (e) {
+    document.getElementById('ai-status').innerText = '🧠 AI: Off';
+  }
+};
+
+const analyzeFrame = async () => {
+  if (!model) return alert('AI model loading...');
+  const vid = document.getElementById('cam-vid');
+  const canvas = document.createElement('canvas');
+  canvas.width = vid.videoWidth || 300; canvas.height = vid.videoHeight || 300;
+  canvas.getContext('2d').drawImage(vid, 0, 0);
+  currentItemPhoto = canvas.toDataURL('image/jpeg', 0.7);
+  document.getElementById('preview-img').src = currentItemPhoto;
+  document.getElementById('photo-preview').style.display = 'block';
+
+  const predictions = await model.classify(canvas);
+  if (predictions && predictions.length > 0) {
+    const top = predictions[0].className.split(',')[0];
+    document.getElementById('inp-item').value = top;
+    document.getElementById('sel-cat').value = inferCat(top);
+    document.getElementById('ai-result').innerText = `AI Recognized: ${top}`;
+  }
+  closeCamera();
+};
+
+const scanSerialOCR = async () => {
+  const vid = document.getElementById('cam-vid');
+  const canvas = document.createElement('canvas');
+  canvas.width = vid.videoWidth || 300; canvas.height = vid.videoHeight || 300;
+  canvas.getContext('2d').drawImage(vid, 0, 0);
+  document.getElementById('ai-result').innerText = '🔍 Scanning OCR text...';
+  try {
+    const worker = await Tesseract.createWorker('eng');
+    const ret = await worker.recognize(canvas);
+    await worker.terminate();
+    const txt = ret.data.text.trim();
+    if (txt) {
+      document.getElementById('inp-item').value += (document.getElementById('inp-item').value ? ' ' : '') + txt.replace(/\n/g, ' ');
+      document.getElementById('ai-result').innerText = `OCR Extracted: ${txt.substring(0, 30)}...`;
+    } else {
+      document.getElementById('ai-result').innerText = 'No clear text detected.';
+    }
+  } catch (e) {
+    document.getElementById('ai-result').innerText = 'OCR scan failed.';
+  }
+};
+
+const startScanner = () => {
+  openModal('scan-modal');
+  html5QrCode = new Html5Qrcode('qr-reader');
+  html5QrCode.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    (decodedText) => {
+      document.getElementById('inp-search').value = decodedText;
+      renderList();
+      stopScanner();
+    },
+    () => {}
+  ).catch(() => {
+    alert('QR Camera Scanner failed to start. Verify site camera permissions.');
+    stopScanner();
+  });
+};
+
+const stopScanner = () => {
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => { html5QrCode.clear(); closeModal('scan-modal'); }).catch(() => closeModal('scan-modal'));
+  } else {
+    closeModal('scan-modal');
+  }
+};
+
+const nfcWriteContainer = async () => {
+  const contId = document.getElementById('sel-container').value;
+  if (!contId) return alert('Select a container first!');
+  if (!('NDEFReader' in window)) return alert('Web NFC is not supported on this device/browser.');
+  try {
+    const ndef = new NDEFReader();
+    await ndef.write(`boxlog:${contId}`);
+    alert('✅ NFC Tag successfully written!');
+  } catch (e) {
+    alert('NFC Write Error: ' + e);
+  }
+};
+
+const setupAutoBackup = () => {
+  setInterval(async () => {
+    const data = {
+      projects: await dbOp('projects', 'readonly', s => s.getAll()),
+      containers: await dbOp('containers', 'readonly', s => s.getAll()),
+      items: await dbOp('items', 'readonly', s => s.getAll())
+    };
+    localStorage.setItem('boxlog_auto_backup', JSON.stringify(data));
+  }, 300000);
+};
+</script>
+</body>
+</html>
