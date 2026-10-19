@@ -14,6 +14,7 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
+    /* --- BoxLog v8 Enhanced UI System (Inspired by B@ comp / BoxRay) --- */
     :root {
       --bg: #f8fafc;
       --card-bg: #ffffff;
@@ -26,6 +27,9 @@
       --heavy: #f59e0b;
       --open1: #10b981;
       --danger: #dc2626;
+      --box-kraft: #fef3c7;
+      --box-border: #d97706;
+      --shelf-color: #b45309;
     }
     body.dark-theme {
       --bg: #0f172a;
@@ -35,67 +39,126 @@
       --accent: #3b82f6;
       --accent-hover: #60a5fa;
       --border: #334155;
+      --box-kraft: #1e293b;
+      --box-border: #f59e0b;
+      --shelf-color: #d97706;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background: var(--bg); color: var(--text); padding-bottom: 40px; transition: background 0.2s, color 0.2s; }
     .container { max-width: 600px; margin: 0 auto; padding: 12px; }
     header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; margin-bottom: 12px; }
-    .logo { font-weight: 800; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 6px; }
+    .logo { font-weight: 800; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 6px; letter-spacing: -0.5px; }
     .header-right { display: flex; align-items: center; gap: 8px; }
-    .btn-small { padding: 6px 12px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; background: var(--accent); color: #fff; transition: transform 0.1s, opacity 0.2s; }
-    .btn-small:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-small { padding: 6px 12px; font-size: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; background: var(--accent); color: #fff; transition: all 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .btn-small:hover { opacity: 0.92; transform: translateY(-1px); }
     .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
     .btn-danger { background: var(--danger); color: #fff; }
-    .project-bar { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .project-bar { background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 16px -2px rgba(0,0,0,0.05); }
     .form-group { margin-bottom: 12px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-    input, select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; outline: none; }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+    input, select, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .row { display: flex; gap: 8px; }
     .col { flex: 1; }
-    button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; }
-    button:hover { background: var(--accent-hover); }
+    button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+    button:hover { background: var(--accent-hover); transform: translateY(-1px); }
     .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
-    .action-grid button { padding: 8px; font-size: 12px; }
+    .action-grid button { padding: 9px 6px; font-size: 12px; box-shadow: none; border-radius: 8px; }
     .flag-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #fff; margin-right: 4px; }
     .flag-fragile { background: var(--fragile); }
     .flag-heavy { background: var(--heavy); }
     .flag-open1 { background: var(--open1); }
-    .inv-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); }
+    .inv-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px; border-bottom: 1px solid var(--border); transition: background 0.15s; border-radius: 8px; }
+    .inv-item:hover { background: var(--bg); }
     .inv-item:last-child { border-bottom: none; }
-    .inv-left { display: flex; align-items: center; gap: 10px; }
-    .inv-img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; background: var(--border); }
-    .inv-title { font-weight: 600; font-size: 14px; }
-    .inv-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .inv-left { display: flex; align-items: center; gap: 12px; }
+    .inv-img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: var(--border); cursor: pointer; border: 1px solid var(--border); transition: transform 0.15s; }
+    .inv-img:hover { transform: scale(1.05); }
+    .inv-title { font-weight: 600; font-size: 14px; color: var(--text); }
+    .inv-sub { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .cat-pill { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; background: #e0e7ff; color: #3730a3; text-transform: uppercase; }
+    .cat-kitchenware { background: #dbeafe; color: #1e40af; }
+    .cat-electronics { background: #f3e8ff; color: #6b21a8; }
+    .cat-clothing { background: #fce7f3; color: #9d174d; }
+    .cat-books { background: #fef3c7; color: #92400e; }
+    .cat-documents { background: #d1fae5; color: #065f46; }
+    .cat-tools { background: #e2e8f0; color: #334155; }
     .search-bar { position: relative; }
-    .search-bar input { padding-left: 32px; }
-    .search-icon { position: absolute; left: 10px; top: 10px; color: var(--muted); font-size: 14px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 16px; }
-    .modal-box { background: var(--card-bg); border-radius: 12px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .search-bar input { padding-left: 34px; }
+    .search-icon { position: absolute; left: 12px; top: 11px; color: var(--muted); font-size: 14px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 16px; }
+    .modal-box { background: var(--card-bg); border-radius: 16px; width: 100%; max-width: 520px; max-height: 85vh; overflow-y: auto; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid var(--border); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); width: auto; padding: 0; }
-    .db-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-    .db-table th, .db-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
-    .db-table th { background: var(--bg); font-weight: 600; }
-    .db-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
-    .db-tab-btn { padding: 6px 10px; font-size: 11px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; cursor: pointer; width: auto; }
+    .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); width: auto; padding: 0; box-shadow: none; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; border-radius: 8px; overflow: hidden; }
+    .db-table th, .db-table td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+    .db-table th { background: var(--bg); font-weight: 700; color: var(--muted); text-transform: uppercase; font-size: 10px; }
+    .db-table tr.room-header { background: #dbeafe; color: #1e40af; font-weight: 700; }
+    body.dark-theme .db-table tr.room-header { background: #1e3a8a; color: #93c5fd; }
+    .db-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .db-tab-btn { padding: 6px 12px; font-size: 11px; font-weight: 600; border-radius: 8px; background: transparent; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; cursor: pointer; width: auto; box-shadow: none; }
     .db-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .chk-row { display: flex; gap: 12px; margin-top: 8px; align-items: center; }
-    .chk-row label { font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .chk-row label { font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; text-transform: none; font-weight: 500; }
     .chk-row input { width: auto; }
-    .ai-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; background: #e0e7ff; color: #3730a3; }
-    .stats-bar { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 8px; }
-    .progress-outer { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+    .ai-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 14px; font-size: 10px; font-weight: 700; background: #e0e7ff; color: #3730a3; }
+    .stats-bar { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 8px; }
+    .progress-outer { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 6px; }
     .progress-inner { height: 100%; background: var(--open1); width: 0%; transition: width 0.3s; }
     .grid-spacer { margin-top: 8px; }
-    .status-pill { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .status-pill { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; }
     .status-packed { background: #dbeafe; color: #1e40af; }
     .status-unpacked { background: #d1fae5; color: #065f46; }
     .help-section { margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
     .help-title { font-weight: 700; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
     .help-text { font-size: 12px; color: var(--muted); line-height: 1.4; }
-  </style>
+
+    /* --- Visual 3D Cardboard Box & Shelf Layout (Inspired by B@ comp.pdf) --- */
+    .box-shelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-top: 12px; padding: 12px; background: var(--bg); border-radius: 12px; border: 1px solid var(--border); position: relative; }
+    .box-cardTile { background: var(--box-kraft); border: 2px solid var(--box-border); border-radius: 10px; padding: 10px; text-align: center; position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .box-cardTile:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
+    .box-cardIcon { font-size: 28px; margin-bottom: 4px; }
+    .box-cardCode { font-weight: 800; font-size: 13px; color: var(--text); }
+    .box-cardName { font-size: 11px; color: var(--muted); margin-top: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+    .box-cardBadge { display: inline-block; background: var(--card-bg); border: 1px solid var(--border); padding: 1px 6px; border-radius: 10px; font-size: 9px; font-weight: 700; color: var(--accent); margin-top: 6px; }
+
+    /* iPad & Large Screen Responsive Split View Layout */
+    .app-layout { display: flex; flex-direction: column; }
+    @media (min-width: 768px) {
+      .container { max-width: 1100px; padding: 20px; }
+      .app-layout { display: grid; grid-template-columns: 480px 1fr; gap: 20px; align-items: start; }
+      .layout-right .card { margin-top: 0 !important; position: sticky; top: 20px; }
+      .modal-box { max-width: 650px; }
+    }
+
+    /* --- Wood Shelf Theme (Inspired by BoxRay & B@ comp) --- */
+    body.wood-theme {
+      --bg: #22140a;
+      --card-bg: #321e10;
+      --text: #fef3c7;
+      --muted: #d97706;
+      --accent: #f59e0b;
+      --accent-hover: #b45309;
+      --border: #523019;
+      background: #22140a linear-gradient(180deg, #2d1b0e 0%, #170d06 100%);
+      background-attachment: fixed;
+    }
+    body.wood-theme .card, body.wood-theme .project-bar {
+      background: #321e10 linear-gradient(180deg, #3d2716 0%, #28170b 100%);
+      border: 1px solid #5a341b;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.5);
+    }
+    body.wood-theme .box-cardTile {
+      background: #d97706 linear-gradient(135deg, #f59e0b 0%, #92400e 100%);
+      border: 2px solid #78350f;
+      color: #1e0a00;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    body.wood-theme .box-cardCode { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    body.wood-theme .box-cardName { color: #fef3c7; }
+
+</style>
 </head>
 <body>
 
@@ -123,7 +186,7 @@
     <div class="header-right">
       <button class="btn-small btn-outline" onclick="openModal('help-modal')" title="Open user guide, tips, and instructions">❓ Help</button>
       <button class="btn-small btn-outline" onclick="startScanner()" title="Scan container QR code using camera">📱 SCAN QR</button>
-      <button class="btn-small btn-outline" onclick="toggleTheme()" title="Toggle dark/light theme mode">🌙</button>
+      <button class="btn-small btn-outline" onclick="toggleTheme()" title="Cycle theme: Light / Dark / Wood Shelf Mode">🪵 Theme</button>
       <div class="ai-pill" id="sync-status" style="background:#d1fae5; color:#065f46;" title="Current connection & background sync status">🟢 Online</div>
       <div class="ai-pill" id="ai-status">🧠 AI: Off</div>
     </div>
@@ -137,7 +200,9 @@
     <span style="color:var(--muted);">⚙️ Switch</span>
   </div>
 
-  <div class="card">
+  <div class="app-layout">
+  <div class="layout-left">
+    <div class="card">
     <div class="form-group">
       <label>CONTAINER SELECTOR</label>
       <div class="row">
@@ -154,7 +219,8 @@
     </div>
   </div>
 
-  <div class="card">
+  
+    <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <label style="margin-bottom:0;">ITEM ENTRY</label>
       <div style="display:flex; gap:6px;">
@@ -218,16 +284,36 @@
     <input type="file" id="restore-file" accept=".json" style="display:none;" onchange="manualRestore(event)">
   </div>
 
-  <div class="card" style="margin-top:16px;">
+  
+  </div>
+  <div class="layout-right">
+    <div class="card" style="margin-top:16px;">
     <div class="search-bar">
       <span class="search-icon">🔍</span>
       <input type="text" id="inp-search" placeholder="Search items or boxes..." oninput="renderList()" title="Filter items by description or box code">
     </div>
     <div id="inv-list" style="margin-top:16px;"></div>
   </div>
-</div>
+
+  </div>
+</div></div>
 
 <!-- MODALS -->
+
+<!-- LIGHTBOX / PHOTO INSPECTOR MODAL (v8) -->
+<div id="lightbox-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 id="lightbox-title">Item Photo Details</h3>
+      <button class="modal-close" onclick="closeModal('lightbox-modal')">×</button>
+    </div>
+    <div style="text-align:center; margin-bottom:16px;">
+      <img id="lightbox-img" style="max-width:100%; max-height:320px; border-radius:12px; object-fit:contain; border:1px solid var(--border); background:var(--bg);" src="" alt="Full view">
+    </div>
+    <div id="lightbox-details" style="font-size:13px; line-height:1.6; color:var(--text);"></div>
+  </div>
+</div>
+
 <div id="proj-modal" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-header">
@@ -441,7 +527,9 @@ const initApp = async () => {
 };
 
 window.onload = () => {
-  if (localStorage.getItem('boxlog_legal_accepted') === 'true') {
+  if (localStorage.getItem('boxlog_theme') === 'dark') document.body.classList.add('dark-theme');
+    if (localStorage.getItem('boxlog_theme') === 'wood') document.body.classList.add('wood-theme');
+    if (localStorage.getItem('boxlog_legal_accepted') === 'true') {
     document.getElementById('splash-screen').style.display = 'none';
     initApp();
   }
@@ -463,7 +551,18 @@ const acceptLegal = () => {
 };
 
 const toggleTheme = () => {
-  document.body.classList.toggle('dark-theme');
+  if (document.body.classList.contains('wood-theme')) {
+    document.body.classList.remove('wood-theme');
+    document.body.classList.remove('dark-theme');
+    localStorage.setItem('boxlog_theme', 'light');
+  } else if (document.body.classList.contains('dark-theme')) {
+    document.body.classList.remove('dark-theme');
+    document.body.classList.add('wood-theme');
+    localStorage.setItem('boxlog_theme', 'wood');
+  } else {
+    document.body.classList.add('dark-theme');
+    localStorage.setItem('boxlog_theme', 'dark');
+  }
 };
 
 const refreshProjects = async () => {
@@ -492,6 +591,34 @@ const addProject = async () => {
   closeModal('proj-modal');
 };
 
+const updateStats = async () => {
+  try {
+    const containers = await dbOp('containers', 'readonly', s => s.getAll());
+    const items = await dbOp('items', 'readonly', s => s.getAll());
+    const projConts = (containers || []).filter(c => c.projId === currentProject);
+    const totalBoxes = projConts.length;
+    const unpackedBoxes = projConts.filter(c => c.isUnpacked).length;
+    const pct = totalBoxes === 0 ? 0 : Math.round((unpackedBoxes / totalBoxes) * 100);
+    
+    const statUnpack = document.getElementById('stat-unpack');
+    if (statUnpack) statUnpack.innerText = `${pct}% Unpacked (${unpackedBoxes}/${totalBoxes})`;
+    
+    const unpackBar = document.getElementById('unpack-bar');
+    if (unpackBar) unpackBar.style.width = `${pct}%`;
+    
+    let totalWeight = 0;
+    const contIds = new Set(projConts.map(c => c.id));
+    (items || []).filter(i => contIds.has(i.containerId)).forEach(i => {
+      totalWeight += (parseFloat(i.weight) || 0) * (parseInt(i.qty) || 1);
+    });
+    
+    const statWeight = document.getElementById('stat-weight');
+    if (statWeight) statWeight.innerText = `${totalWeight.toFixed(1)} lbs packed`;
+  } catch(e) {
+    console.log('Error updating stats:', e);
+  }
+};
+
 const delProj = async (id) => {
   if (!confirm('Delete this project and all its containers/items?')) return;
   await dbOp('projects', 'readwrite', s => s.delete(id));
@@ -500,7 +627,12 @@ const delProj = async (id) => {
     if (c.projId === id) {
       await dbOp('containers', 'readwrite', s => s.delete(c.id));
       const items = await dbOp('items', 'readonly', s => s.index('containerId').getAll(c.id));
-      for (let i of items) await dbOp('items', 'readwrite', s => s.delete(i.id));
+      for (let i of items) {
+        if (i.imageId) {
+          try { await dbOp('images', 'readwrite', s => s.delete(i.imageId)); } catch(e){}
+        }
+        await dbOp('items', 'readwrite', s => s.delete(i.id));
+      }
     }
   }
   if (currentProject === id) await switchProj('proj_default');
@@ -649,6 +781,41 @@ const editItem = async (id) => {
   await updateStats();
 };
 
+
+const openLightbox = async (itemId) => {
+  const item = await dbOp('items', 'readonly', s => s.get(itemId));
+  if (!item) return;
+  const containers = await dbOp('containers', 'readonly', s => s.getAll());
+  const c = containers.find(c => c.id === item.containerId);
+  let photoSrc = item.image || null;
+  if (item.imageId) {
+    try {
+      const imgRec = await dbOp('images', 'readonly', s => s.get(item.imageId));
+      if (imgRec) photoSrc = imgRec.data;
+    } catch(e){}
+  }
+  document.getElementById('lightbox-title').innerText = item.name;
+  const imgEl = document.getElementById('lightbox-img');
+  if (photoSrc) {
+    imgEl.src = photoSrc;
+    imgEl.style.display = 'block';
+  } else {
+    imgEl.style.display = 'none';
+  }
+  const detailsDiv = document.getElementById('lightbox-details');
+  detailsDiv.innerHTML = `
+    <div style="background:var(--bg); padding:12px; border-radius:10px; border:1px solid var(--border);">
+      <p><strong>Container:</strong> ${c ? c.code + ' - ' + c.name + ' [' + (c.room||'Unassigned') + ']' : 'Unassigned'}</p>
+      <p><strong>Quantity:</strong> ${item.qty || 1}</p>
+      <p><strong>Category:</strong> <span class="cat-pill">${item.cat || 'General'}</span></p>
+      <p><strong>Estimated Value:</strong> ${item.val ? '$' + parseFloat(item.val).toFixed(2) : 'Not specified'}</p>
+      <p><strong>Weight:</strong> ${item.weight ? item.weight + ' lbs' : 'Not specified'}</p>
+      <p><strong>Added:</strong> ${new Date(item.ts).toLocaleDateString()} ${new Date(item.ts).toLocaleTimeString()}</p>
+    </div>
+  `;
+  openModal('lightbox-modal');
+};
+
 const delItem = async (id) => {
   const item = await dbOp('items', 'readonly', s => s.get(id));
   if (item && item.imageId) {
@@ -684,7 +851,7 @@ const renderList = async () => {
     const wStr = i.weight > 0 ? ` • ${i.weight}lbs` : '';
     const vStr = i.val > 0 ? ` • $${i.val.toFixed(2)}` : '';
     const photoSrc = (i.imageId && imgMap[i.imageId]) ? imgMap[i.imageId] : (i.image || null);
-    const imgTag = photoSrc ? `<img src="${photoSrc}" class="inv-img">` : '<div class="inv-img" style="display:flex; justify-content:center; align-items:center; color:var(--muted); font-size:18px;">📦</div>';
+    const imgTag = photoSrc ? `<img src="${photoSrc}" class="inv-img" onclick="openLightbox('${i.id}')" title="Tap for full photo & details">` : `<div class="inv-img" style="display:flex; justify-content:center; align-items:center; color:var(--muted); font-size:18px; cursor:pointer;" onclick="openLightbox('${i.id}')">📦</div>`;
     return `<div class="inv-item">
       <div class="inv-left">
         ${imgTag}
