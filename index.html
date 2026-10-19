@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#2563eb">
   <link rel="manifest" href="manifest.json">
-  <title>BoxLog Smart Moving & Inventory</title>
+  <title>BoxLog: Home & Moving Inventory</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -158,6 +158,213 @@
     body.wood-theme .box-cardCode { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     body.wood-theme .box-cardName { color: #fef3c7; }
 
+
+    /* --- BoxLog v9 Enhanced Visual Design System (Inspired by B1 comp.pdf & B@ comp.pdf) --- */
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e2e8f0;
+      --fragile: #ef4444;
+      --heavy: #f59e0b;
+      --open1: #10b981;
+      --danger: #dc2626;
+      --box-kraft: #fef3c7;
+      --box-border: #d97706;
+      --nav-bg: #ffffff;
+      --studio-purple: #4c1d95;
+    }
+
+    body.dark-theme {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --border: #334155;
+      --box-kraft: #33291e;
+      --box-border: #b45309;
+      --nav-bg: #1e293b;
+    }
+
+    body.wood-theme {
+      --bg: #2d1e18;
+      --card-bg: #3d2b22;
+      --text: #fdf8f5;
+      --muted: #d4b8a5;
+      --accent: #e58e38;
+      --accent-hover: #f3a657;
+      --border: #523b30;
+      --box-kraft: #eab308;
+      --box-border: #a16207;
+      --nav-bg: #3d2b22;
+      background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 30px, transparent 30px, transparent 60px);
+    }
+
+    body.studio-theme {
+      --bg: #3b0764;
+      --card-bg: #581c87;
+      --text: #faf5ff;
+      --muted: #c084fc;
+      --accent: #a855f7;
+      --accent-hover: #c084fc;
+      --border: #6b21a8;
+      --box-kraft: #fae8ff;
+      --box-border: #d8b4fe;
+      --nav-bg: #581c87;
+    }
+
+    /* Top View Switcher Navigation Bar */
+    .top-nav {
+      display: flex;
+      gap: 6px;
+      background: var(--nav-bg);
+      border: 1px solid var(--border);
+      padding: 6px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .nav-tab {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-tab.active {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    /* B1 Comp Smart Dashboard Metrics Cards */
+    .dashboard-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .metric-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .metric-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Spaces Color-Coded Grid (Inspired by B1 comp.pdf) */
+    .spaces-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (min-width: 600px) {
+      .spaces-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .space-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 12px;
+      border: 2px solid var(--border);
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .space-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+    .space-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .space-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .space-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      color: #fff;
+    }
+    .space-stats {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Craft Box Card Grid */
+    .box-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .box-cardTile {
+      background: var(--box-kraft);
+      border: 2px solid var(--box-border);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .box-cardTile:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+    .box-cardIcon { font-size: 28px; margin-bottom: 4px; }
+    .box-cardCode { font-weight: 800; font-size: 13px; color: var(--text); }
+    .box-cardName { font-size: 11px; color: var(--muted); margin-top: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+    .box-cardBadge { display: inline-block; background: var(--card-bg); border: 1px solid var(--border); padding: 1px 6px; border-radius: 10px; font-size: 9px; font-weight: 700; color: var(--accent); margin-top: 6px; }
+
+    /* iPad Split Layout */
+    .app-layout { display: flex; flex-direction: column; }
+    @media (min-width: 768px) {
+      .container { max-width: 1100px; padding: 20px; }
+      .app-layout { display: grid; grid-template-columns: 480px 1fr; gap: 20px; align-items: start; }
+      .layout-right .card { margin-top: 0 !important; position: sticky; top: 20px; }
+      .modal-box { max-width: 650px; }
+    }
+    
 </style>
 </head>
 <body>
@@ -191,6 +398,39 @@
       <div class="ai-pill" id="ai-status">🧠 AI: Off</div>
     </div>
   </header>
+
+  <!-- Top View Mode Switcher -->
+  <div class="top-nav">
+    <button class="nav-tab active" id="tab-nav-dash" onclick="switchMainView('dashboard')">📊 Dashboard</button>
+    <button class="nav-tab" id="tab-nav-spaces" onclick="switchMainView('spaces')">🎨 Spaces & Boxes</button>
+    <button class="nav-tab" id="tab-nav-track" onclick="switchMainView('track')">📋 Item Track</button>
+    <button class="nav-tab" id="tab-nav-scan" onclick="switchMainView('scan')">📱 Scan & QR</button>
+  </div>
+
+  <!-- View Section: Smart Dashboard View -->
+  <div id="view-dashboard" class="main-view-section">
+    <div class="dashboard-metrics">
+      <div class="metric-card"><div class="metric-num" id="dash-num-spaces">0</div><div class="metric-label">Spaces</div></div>
+      <div class="metric-card"><div class="metric-num" id="dash-num-boxes">0</div><div class="metric-label">Boxes</div></div>
+      <div class="metric-card"><div class="metric-num" id="dash-num-items">0</div><div class="metric-label">Objects</div></div>
+      <div class="metric-card"><div class="metric-num" id="dash-num-images">0</div><div class="metric-label">Images</div></div>
+    </div>
+  </div>
+
+  <!-- View Section: Spaces & Box Grid View -->
+  <div id="view-spaces" class="main-view-section" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <h3 style="font-size:16px; font-weight:800; color:var(--accent);">🎨 Household Spaces</h3>
+      <button class="btn-small" style="width:auto;" onclick="openModal('container-modal')">+ New Container</button>
+    </div>
+    <div id="spaces-grid-container" class="spaces-grid"></div>
+
+    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <h3 style="font-size:16px; font-weight:800; color:var(--accent);">📦 Container Shelf Grid</h3>
+    </div>
+    <div id="box-shelf-grid" class="box-grid"></div>
+  </div>
+
 
   <div class="project-bar" onclick="openModal('proj-modal')" title="Switch or manage workspace projects">
     <div>
@@ -352,6 +592,20 @@
       <option value="Office">Office</option>
       <option value="Bathroom">Bathroom</option>
     </select>
+    <div style="margin:8px 0 10px 0;">
+      <label style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:4px; display:block;">🎨 Space Accent Color:</label>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input type="color" id="inp-space-color" value="#2563eb" style="width:44px; height:34px; padding:2px; border-radius:6px; border:1px solid var(--border); cursor:pointer;" title="Choose custom space accent color">
+        <div style="display:flex; gap:6px;">
+          <button type="button" onclick="setSpaceColor('#2563eb')" style="width:24px; height:24px; border-radius:50%; background:#2563eb; border:1px solid var(--border); cursor:pointer;" title="Blue"></button>
+          <button type="button" onclick="setSpaceColor('#10b981')" style="width:24px; height:24px; border-radius:50%; background:#10b981; border:1px solid var(--border); cursor:pointer;" title="Emerald"></button>
+          <button type="button" onclick="setSpaceColor('#8b5cf6')" style="width:24px; height:24px; border-radius:50%; background:#8b5cf6; border:1px solid var(--border); cursor:pointer;" title="Purple"></button>
+          <button type="button" onclick="setSpaceColor('#ec4899')" style="width:24px; height:24px; border-radius:50%; background:#ec4899; border:1px solid var(--border); cursor:pointer;" title="Pink"></button>
+          <button type="button" onclick="setSpaceColor('#f97316')" style="width:24px; height:24px; border-radius:50%; background:#f97316; border:1px solid var(--border); cursor:pointer;" title="Orange"></button>
+          <button type="button" onclick="setSpaceColor('#06b6d4')" style="width:24px; height:24px; border-radius:50%; background:#06b6d4; border:1px solid var(--border); cursor:pointer;" title="Cyan"></button>
+        </div>
+      </div>
+    </div>
     <div class="chk-row">
       <label title="Fragile handle with care"><input type="checkbox" id="chk-fragile"> ⚠️ Fragile</label>
       <label title="Heavy over 30 lbs"><input type="checkbox" id="chk-heavy"> 🏋️ Heavy</label>
@@ -527,6 +781,8 @@ const initApp = async () => {
 };
 
 window.onload = () => {
+  applyTheme(currentThemeMode);
+  renderSpacesGrid();
   if (localStorage.getItem('boxlog_theme') === 'dark') document.body.classList.add('dark-theme');
     if (localStorage.getItem('boxlog_theme') === 'wood') document.body.classList.add('wood-theme');
     if (localStorage.getItem('boxlog_legal_accepted') === 'true') {
@@ -591,8 +847,96 @@ const addProject = async () => {
   closeModal('proj-modal');
 };
 
+const renderSpacesGrid = async () => {
+  try {
+    const containers = await dbOp('containers', 'readonly', s => s.getAll());
+    const items = await dbOp('items', 'readonly', s => s.getAll());
+    const images = await dbOp('images', 'readonly', s => s.getAll());
+    
+    const projConts = (containers || []).filter(c => c.projId === currentProject);
+    const contIds = new Set(projConts.map(c => c.id));
+    const projItems = (items || []).filter(i => contIds.has(i.containerId));
+    
+    const spacesMap = {};
+    projConts.forEach(c => {
+      const rm = c.room || 'Unassigned';
+      if (!spacesMap[rm]) spacesMap[rm] = { room: rm, containers: [], itemsCount: 0, totalVal: 0, color: c.color || localStorage.getItem('boxlog_room_color_' + rm) || '#2563eb' };
+      spacesMap[rm].containers.push(c);
+    });
+    
+    projItems.forEach(i => {
+      const c = projConts.find(cont => cont.id === i.containerId);
+      const rm = c ? (c.room || 'Unassigned') : 'Unassigned';
+      if (spacesMap[rm]) {
+        spacesMap[rm].itemsCount += (parseInt(i.qty) || 1);
+        spacesMap[rm].totalVal += (parseFloat(i.val) || 0) * (parseInt(i.qty) || 1);
+      }
+    });
+
+    const numSpacesEl = document.getElementById('dash-num-spaces');
+    if (numSpacesEl) numSpacesEl.innerText = Object.keys(spacesMap).length;
+    
+    const numBoxesEl = document.getElementById('dash-num-boxes');
+    if (numBoxesEl) numBoxesEl.innerText = projConts.length;
+    
+    const numItemsEl = document.getElementById('dash-num-items');
+    if (numItemsEl) numItemsEl.innerText = projItems.reduce((acc, i) => acc + (parseInt(i.qty) || 1), 0);
+    
+    const numImagesEl = document.getElementById('dash-num-images');
+    if (numImagesEl) numImagesEl.innerText = (images || []).length;
+
+    const spacesGridEl = document.getElementById('spaces-grid-container');
+    if (spacesGridEl) {
+      if (Object.keys(spacesMap).length === 0) {
+        spacesGridEl.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--muted); padding:20px;">No spaces created yet. Click + New Container to assign boxes to rooms!</p>';
+      } else {
+        spacesGridEl.innerHTML = Object.values(spacesMap).map(sp => {
+          const roomIconMap = {
+            'Kitchen': '🍳', 'Master Bed': '🛏️', 'Living Room': '🛋️', 'Garage': '🚗',
+            'Office': '💻', 'Bathroom': '🛁', 'Dining Room': '🍽️', 'Unassigned': '📦'
+          };
+          const icon = roomIconMap[sp.room] || '🏠';
+          const accentColor = sp.color || '#2563eb';
+          return `<div class="space-card" style="border-top: 4px solid ${accentColor};" onclick="document.getElementById('inp-search').value='${sp.room}'; renderList(); switchViewTab('items');">
+            <div class="space-card-header">
+              <div class="space-title">${icon} ${sp.room}</div>
+              <span class="space-pill" style="background:${accentColor}22; color:${accentColor}; border:1px solid ${accentColor}44;">${sp.containers.length} Box${sp.containers.length===1?'':'es'}</span>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:4px;">
+              <div>📋 ${sp.itemsCount} Objects</div>
+              <div style="font-weight:700; color:var(--text); margin-top:2px;">💰 $${sp.totalVal.toFixed(2)}</div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    const boxShelfEl = document.getElementById('box-shelf-grid');
+    if (boxShelfEl) {
+      if (projConts.length === 0) {
+        boxShelfEl.innerHTML = '<p style="text-align:center; color:var(--muted); padding:20px;">No containers packed in this workspace.</p>';
+      } else {
+        boxShelfEl.innerHTML = projConts.map(c => {
+          const cColor = c.color || localStorage.getItem('boxlog_room_color_' + (c.room||'Unassigned')) || '#2563eb';
+          const contItems = projItems.filter(i => i.containerId === c.id);
+          const itemCount = contItems.reduce((a,i)=>a+(parseInt(i.qty)||1), 0);
+          return `<div class="box-cardTile" style="border-left: 4px solid ${cColor};" onclick="document.getElementById('inp-search').value='${c.code}'; renderList(); switchViewTab('items');">
+            <div class="box-cardIcon">📦</div>
+            <div class="box-cardCode">${c.code}</div>
+            <div class="box-cardName">${c.name}</div>
+            <div class="box-cardBadge" style="color:${cColor}; border-color:${cColor}44;">${c.room||'Unassigned'} (${itemCount})</div>
+          </div>`;
+        }).join('');
+      }
+    }
+  } catch(e) {
+    console.log('Error rendering spaces grid:', e);
+  }
+};
+
 const updateStats = async () => {
   try {
+    await renderSpacesGrid();
     const containers = await dbOp('containers', 'readonly', s => s.getAll());
     const items = await dbOp('items', 'readonly', s => s.getAll());
     const projConts = (containers || []).filter(c => c.projId === currentProject);
@@ -665,16 +1009,26 @@ const refreshContainers = async () => {
   updateStats();
 };
 
+const setSpaceColor = (hex) => {
+  const inp = document.getElementById('inp-space-color');
+  if (inp) inp.value = hex;
+};
+
 const addContainer = async () => {
   const type = document.getElementById('sel-cont-type').value;
   const name = document.getElementById('inp-cont-name').value.trim() || type;
   const room = document.getElementById('sel-room').value;
+  const colorInp = document.getElementById('inp-space-color');
+  const color = colorInp ? colorInp.value : '#2563eb';
+  if (room && room !== 'Unassigned') {
+    localStorage.setItem('boxlog_room_color_' + room, color);
+  }
   const isFragile = document.getElementById('chk-fragile').checked;
   const isHeavy = document.getElementById('chk-heavy').checked;
   const isOpenFirst = document.getElementById('chk-open1').checked;
   const count = (await dbOp('containers', 'readonly', s => s.getAll())).filter(c => c.projId === currentProject).length + 1;
   const code = type + '-' + String(count).padStart(3, '0');
-  const newCont = { id: 'cont_' + Date.now(), projId: currentProject, code, name, type, room, isFragile, isHeavy, isOpenFirst, isUnpacked: false, ts: Date.now() };
+  const newCont = { id: 'cont_' + Date.now(), projId: currentProject, code, name, type, room, color, isFragile, isHeavy, isOpenFirst, isUnpacked: false, ts: Date.now() };
   await dbOp('containers', 'readwrite', s => s.add(newCont));
   document.getElementById('inp-cont-name').value = '';
   document.getElementById('chk-fragile').checked = false;
@@ -1068,7 +1422,7 @@ const printLabels = async () => {
   const containers = (await dbOp('containers', 'readonly', s => s.getAll())).filter(c => c.projId === currentProject);
   if (containers.length === 0) return alert('No containers to print.');
   const w = window.open('', '_blank');
-  let html = '<html><head><title>BoxLog QR Labels</title><style>body{font-family:sans-serif; display:grid; grid-template-columns:repeat(2,1fr); gap:20px; padding:20px;}.card{border:2px solid #000; padding:15px; border-radius:10px; text-align:center;}</style></head><body>';
+  let html = `<html><head><title>BoxLog QR Labels</title><style>body{font-family:sans-serif; display:grid; grid-template-columns:repeat(2,1fr); gap:20px; padding:20px;}.card{border:2px solid #000; padding:15px; border-radius:10px; text-align:center;}</style></head><body>`;
   containers.forEach(c => {
     html += `<div class="card"><h2>${c.code}</h2><h3>${c.name}</h3><p>Room: ${c.room||'Unassigned'}</p><div id="qr_${c.id}" style="display:flex; justify-content:center; margin:10px 0;"></div></div>`;
   });
@@ -1076,7 +1430,22 @@ const printLabels = async () => {
   containers.forEach(c => {
     html += `new QRCode(document.getElementById("qr_${c.id}"), { text: "${c.code}", width: 100, height: 100 });`;
   });
-  html += `window.onload = () => window.print();<\/script></body></html>`;
+  html += `window.onload = () => window.print();<\/script>
+<!-- Photo Lightbox Inspector Modal -->
+<div id="photo-inspector-modal" class="modal-overlay">
+  <div class="modal-box" style="text-align:center; max-width:550px;">
+    <div class="modal-header">
+      <h3 id="inspector-title">Item Photo Inspector</h3>
+      <button class="modal-close" onclick="closeModal('photo-inspector-modal')">×</button>
+    </div>
+    <div style="width:100%; height:260px; background:#000; border-radius:10px; overflow:hidden; margin-bottom:12px; display:flex; justify-content:center; align-items:center;">
+      <img id="inspector-img" style="max-width:100%; max-height:100%; object-fit:contain;">
+    </div>
+    <div id="inspector-details" style="font-size:13px; color:var(--muted); text-align:left; background:var(--bg); padding:12px; border-radius:8px; border:1px solid var(--border);"></div>
+  </div>
+</div>
+
+</body></html>`;
   w.document.write(html);
 };
 
@@ -1289,5 +1658,20 @@ const setupAutoBackup = () => {
   }, 300000);
 };
 </script>
+
+<!-- Photo Lightbox Inspector Modal -->
+<div id="photo-inspector-modal" class="modal-overlay">
+  <div class="modal-box" style="text-align:center; max-width:550px;">
+    <div class="modal-header">
+      <h3 id="inspector-title">Item Photo Inspector</h3>
+      <button class="modal-close" onclick="closeModal('photo-inspector-modal')">×</button>
+    </div>
+    <div style="width:100%; height:260px; background:#000; border-radius:10px; overflow:hidden; margin-bottom:12px; display:flex; justify-content:center; align-items:center;">
+      <img id="inspector-img" style="max-width:100%; max-height:100%; object-fit:contain;">
+    </div>
+    <div id="inspector-details" style="font-size:13px; color:var(--muted); text-align:left; background:var(--bg); padding:12px; border-radius:8px; border:1px solid var(--border);"></div>
+  </div>
+</div>
+
 </body>
 </html>
