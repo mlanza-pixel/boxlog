@@ -71,7 +71,7 @@
     .search-bar { position: relative; }
     .search-bar input { padding-left: 32px; }
     .search-icon { position: absolute; left: 10px; top: 10px; color: var(--muted); font-size: 14px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 16px; }
     .modal-box { background: var(--card-bg); border-radius: 12px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); width: auto; padding: 0; }
@@ -106,7 +106,7 @@
   <button onclick="showDisclaimer()" style="max-width:240px;" title="Begin using BoxLog and review terms">Get Started</button>
 </div>
 
-<div id="legal-modal" class="modal-overlay">
+<div id="legal-modal" class="modal-overlay" style="z-index:3000;">
   <div class="modal-box">
     <h3>📜 Terms & Legal Disclaimer</h3>
     <div style="font-size:12px; color:var(--muted); margin:12px 0; max-height:200px; overflow-y:auto; border:1px solid var(--border); padding:10px; border-radius:6px;">
@@ -448,7 +448,11 @@ window.onload = () => {
 };
 
 const showDisclaimer = () => {
-  document.getElementById('legal-modal').style.display = 'flex';
+  const legalModal = document.getElementById('legal-modal');
+  if (legalModal) {
+    legalModal.style.display = 'flex';
+    legalModal.style.zIndex = '3000';
+  }
 };
 
 const acceptLegal = () => {

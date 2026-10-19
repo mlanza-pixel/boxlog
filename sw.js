@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boxlog-v6a';
+const CACHE_NAME = 'boxlog-v7';
 const ASSETS = [
   './',
   './index.html',
