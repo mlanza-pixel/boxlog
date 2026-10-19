@@ -365,6 +365,34 @@
       .modal-box { max-width: 650px; }
     }
     
+
+    /* Walkthrough & Visual Tutorial System */
+    .tutorial-slide { display: none; animation: fadeIn 0.25s ease-in-out; }
+    .tutorial-slide.active { display: block; }
+    .tutorial-graphic {
+      background: var(--bg);
+      border: 2px dashed var(--accent);
+      border-radius: 16px;
+      padding: 16px;
+      margin: 14px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+    }
+    .tutorial-dots { display: flex; justify-content: center; gap: 8px; margin: 12px 0; }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .dot.active { background: var(--accent); transform: scale(1.3); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
 </style>
 </head>
 <body>
@@ -538,6 +566,81 @@
   </div>
 </div></div>
 
+
+<div id="tutorial-modal" class="modal-overlay" style="z-index:4000;">
+  <div class="modal-box" style="max-width:520px; text-align:center;">
+    <div class="modal-header">
+      <h3 style="font-size:18px; color:var(--accent);">🎓 BoxLog Quick Visual Walkthrough</h3>
+      <button class="modal-close" onclick="closeTutorialModal()">×</button>
+    </div>
+
+    <!-- Slide 1 -->
+    <div class="tutorial-slide active" id="tut-slide-1">
+      <div class="tutorial-graphic" style="background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(16,185,129,0.08));">
+        <div style="font-size:44px; margin-bottom:8px;">🎨 📦 🏠</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-top:4px;">
+          <span style="background:#10b981; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">🍳 Kitchen</span>
+          <span style="background:#8b5cf6; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">🛏️ Bedroom</span>
+          <span style="background:#f59e0b; color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">🚗 Garage</span>
+        </div>
+      </div>
+      <h4 style="font-size:15px; margin-bottom:4px;">1. Organize by Spaces & Color-Coded Boxes</h4>
+      <p style="font-size:12px; color:var(--muted); line-height:1.4;">Create room spaces, assign custom accent colors, and pack belongings into craft cardboard box containers with instant auto-generated box codes (e.g., <code>BOX-001</code>).</p>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="tutorial-slide" id="tut-slide-2">
+      <div class="tutorial-graphic" style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(239,68,68,0.08));">
+        <div style="font-size:42px; margin-bottom:8px;">📷 🎤 ⚡</div>
+        <div style="font-size:11px; font-weight:700; color:var(--accent); background:var(--card-bg); padding:5px 12px; border-radius:20px; border:1px solid var(--border);">
+          "3 ceramic plates $45" ➔ AI Auto-Categorized
+        </div>
+      </div>
+      <h4 style="font-size:15px; margin-bottom:4px;">2. AI Cam, Voice Dictation & Bulk Entry</h4>
+      <p style="font-size:12px; color:var(--muted); line-height:1.4;">Snap photos with <b>📷 AI Cam</b> for automatic object recognition, dictate items hands-free with <b>🎤 Voice</b>, or paste multiple lines with <b>⚡ Bulk Entry</b>.</p>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="tutorial-slide" id="tut-slide-3">
+      <div class="tutorial-graphic" style="background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(37,99,235,0.08));">
+        <div style="font-size:44px; margin-bottom:8px;">🏷️ 📱 🔍</div>
+        <div style="font-size:11px; font-weight:700; color:var(--muted);">QR Code Labels + Camera Scanner</div>
+      </div>
+      <h4 style="font-size:15px; margin-bottom:4px;">3. Print QR Labels & Scan on Arrival</h4>
+      <p style="font-size:12px; color:var(--muted); line-height:1.4;">Tap <b>🏷️ Print Labels</b> to print box QR codes. Tap <b>📱 SCAN QR</b> on your iPhone or iPad camera to instantly pull up any box's contents on moving day.</p>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="tutorial-slide" id="tut-slide-4">
+      <div class="tutorial-graphic" style="background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.08));">
+        <div style="font-size:44px; margin-bottom:8px;">🔒 💾 ☁️</div>
+        <div style="font-size:10px; font-weight:700; color:#065f46; background:#d1fae5; padding:3px 8px; border-radius:12px;">100% Private Offline IndexedDB Storage</div>
+      </div>
+      <h4 style="font-size:15px; margin-bottom:4px;">4. 100% Private Offline Storage & Backup</h4>
+      <p style="font-size:12px; color:var(--muted); line-height:1.4;">All data stays safely inside your browser. Tap <b>💾 Save File</b> to export a backup to iCloud Drive or Google Drive, and tap <b>📂 Load File</b> to sync across devices.</p>
+    </div>
+
+    <!-- Indicator Dots -->
+    <div class="tutorial-dots">
+      <span class="dot active" id="tut-dot-1" onclick="setTutorialSlide(1)"></span>
+      <span class="dot" id="tut-dot-2" onclick="setTutorialSlide(2)"></span>
+      <span class="dot" id="tut-dot-3" onclick="setTutorialSlide(3)"></span>
+      <span class="dot" id="tut-dot-4" onclick="setTutorialSlide(4)"></span>
+    </div>
+
+    <!-- Checkbox & Buttons -->
+    <div style="margin: 10px 0 14px 0; font-size:12px; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:6px;">
+      <input type="checkbox" id="chk-dismiss-tutorial">
+      <label for="chk-dismiss-tutorial" style="cursor:pointer; margin-bottom:0; font-weight:600;">Don't show this walkthrough on startup again</label>
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:space-between;">
+      <button class="btn-small btn-outline" id="tut-btn-prev" onclick="prevTutorialSlide()" style="width:90px;">Back</button>
+      <button class="btn-small" id="tut-btn-next" onclick="nextTutorialSlide()" style="flex:1;">Next ➔</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODALS -->
 
 <!-- LIGHTBOX / PHOTO INSPECTOR MODAL (v8) -->
@@ -692,6 +795,9 @@
       <button class="modal-close" onclick="closeModal('help-modal')" title="Close help window">×</button>
     </div>
     
+    
+    <button class="btn-small" onclick="closeModal('help-modal'); openTutorialModal(1);" style="width:100%; margin-bottom:14px; background:var(--accent);">🎓 Launch Interactive Visual Walkthrough</button>
+
     <div class="help-section">
       <div class="help-title">🌐 Netlify & Cloud Deployment</div>
       <div class="help-text">BoxLog runs natively as a PWA on Netlify with full HTTPS encryption. All data is saved safely in browser IndexedDB. Cross-device syncing is performed using <strong>💾 Save File</strong> and <strong>📂 Load File</strong> via iCloud Drive or Google Drive.</div>
@@ -725,6 +831,59 @@
 </div>
 
 <script>
+
+let currentTutSlide = 1;
+
+const openTutorialModal = (slideNum = 1) => {
+  const modal = document.getElementById('tutorial-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.zIndex = '4000';
+    setTutorialSlide(slideNum);
+  }
+};
+
+const setTutorialSlide = (n) => {
+  currentTutSlide = n;
+  for (let i = 1; i <= 4; i++) {
+    const slide = document.getElementById(`tut-slide-${i}`);
+    const dot = document.getElementById(`tut-dot-${i}`);
+    if (slide) {
+      slide.style.display = i === n ? 'block' : 'none';
+      if (i === n) slide.classList.add('active');
+    }
+    if (dot) dot.classList.toggle('active', i === n);
+  }
+  const prevBtn = document.getElementById('tut-btn-prev');
+  const nextBtn = document.getElementById('tut-btn-next');
+  if (prevBtn) prevBtn.style.visibility = n === 1 ? 'hidden' : 'visible';
+  if (nextBtn) nextBtn.innerText = n === 4 ? 'Got It! Start Using BoxLog' : 'Next ➔';
+};
+
+const nextTutorialSlide = () => {
+  if (currentTutSlide < 4) {
+    setTutorialSlide(currentTutSlide + 1);
+  } else {
+    closeTutorialModal();
+  }
+};
+
+const prevTutorialSlide = () => {
+  if (currentTutSlide > 1) {
+    setTutorialSlide(currentTutSlide - 1);
+  }
+};
+
+const closeTutorialModal = () => {
+  const chk = document.getElementById('chk-dismiss-tutorial');
+  if (chk && chk.checked) {
+    localStorage.setItem('boxlog_tutorial_dismissed', 'true');
+  }
+  const modal = document.getElementById('tutorial-modal');
+  if (modal) modal.style.display = 'none';
+  initApp();
+};
+
 let db;
 let currentProject = 'proj_default';
 let currentItemPhoto = null;
@@ -784,10 +943,14 @@ window.onload = () => {
   applyTheme(currentThemeMode);
   renderSpacesGrid();
   if (localStorage.getItem('boxlog_theme') === 'dark') document.body.classList.add('dark-theme');
-    if (localStorage.getItem('boxlog_theme') === 'wood') document.body.classList.add('wood-theme');
-    if (localStorage.getItem('boxlog_legal_accepted') === 'true') {
+  if (localStorage.getItem('boxlog_theme') === 'wood') document.body.classList.add('wood-theme');
+  if (localStorage.getItem('boxlog_legal_accepted') === 'true') {
     document.getElementById('splash-screen').style.display = 'none';
-    initApp();
+    if (localStorage.getItem('boxlog_tutorial_dismissed') !== 'true') {
+      openTutorialModal(1);
+    } else {
+      initApp();
+    }
   }
 };
 
@@ -803,7 +966,11 @@ const acceptLegal = () => {
   localStorage.setItem('boxlog_legal_accepted', 'true');
   document.getElementById('legal-modal').style.display = 'none';
   document.getElementById('splash-screen').style.display = 'none';
-  initApp();
+  if (localStorage.getItem('boxlog_tutorial_dismissed') !== 'true') {
+    openTutorialModal(1);
+  } else {
+    initApp();
+  }
 };
 
 const toggleTheme = () => {
